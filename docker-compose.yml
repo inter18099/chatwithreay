@@ -1,15 +1,26 @@
+version: '3'
 services:
-  app:
-    image: app
+  message-service:
+    image: openjdk:11
+    container_name: java-container-message-service
+    expose:
+        - "8080"
+    volumes:
+      - "./backend/target:/app"
+    networks:
+      - spring-cloud-network
+    command: java -jar /app/chatwithreay-0.0.1-SNAPSHOT.jar
+  database1:
+    image: "postgres:13.5" # use latest official postgres version
+    env_file:
+      - database.env # configure postgres
     ports:
-    - "8080:8080"
-    depends_on:
-    - postgres1
-  postgres1:
-    image: gitpod/workspace-postgres
-    ports:
-     - "5432:5432"
-    environment:
-     - POSTGRES_PASSWORD=password
-     - POSTGRES_USER=postgres
-     - POSTGRES_DB=chatdb
+      - 5432:5432
+    volumes:
+      - database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+volumes:
+  database-data: # named volumes can be managed easier using docker-compose
+
+networks:
+    spring-cloud-network:
+        driver: bridge
